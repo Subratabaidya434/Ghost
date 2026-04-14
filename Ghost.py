@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filte
 import requests
 
 BOT_TOKEN = "8134071034:AAGaGSd2RilmkKeLy9lbSU8DbXf6TitDi9Y"
-API_KEY = "YOUR_ELEVENLABS_API_KEY"
+API_KEY = "sk_1cf94558c8809308d90cba3e74776162fce6af087095add6"
 
 VOICE_ID = "EXAVITQu4vr4xnSDxMaL"  # default voice (changeable)
 
