@@ -1,46 +1,55 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 import requests
+import os
 
 BOT_TOKEN = "8134071034:AAGaGSd2RilmkKeLy9lbSU8DbXf6TitDi9Y"
 API_KEY = "sk_1cf94558c8809308d90cba3e74776162fce6af087095add6"
 
-VOICE_ID = "EXAVITQu4vr4xnSDxMaL"  # default voice (changeable)
+VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
 
 async def generate_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
+    try:
+        text = update.message.text
 
-    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
-    headers = {
-        "xi-api-key": API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    data = {
-        "text": text,
-        "model_id": "eleven_multilingual_v2",
-        "voice_settings": {
-            "stability": 0.4,
-            "similarity_boost": 0.8
+        headers = {
+            "xi-api-key": API_KEY,
+            "Content-Type": "application/json"
         }
-    }
 
-    response = requests.post(url, json=data, headers=headers)
+        data = {
+            "text": text,
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": {
+                "stability": 0.3,
+                "similarity_boost": 0.9
+            }
+        }
 
-    with open("voice.mp3", "wb") as f:
-        f.write(response.content)
+        response = requests.post(url, json=data, headers=headers)
 
-    with open("voice.mp3", "rb") as audio:
-        await update.message.reply_voice(audio)
+        if response.status_code != 200:
+            await update.message.reply_text("❌ Voice generate failed")
+            return
 
-async def main():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, generate_voice))
+        file_name = "voice.mp3"
 
-    print("Bot running with REAL AI voice...")
-    app.run_polling()
+        with open(file_name, "wb") as f:
+            f.write(response.content)
 
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+        with open(file_name, "rb") as audio:
+            await update.message.reply_voice(audio)
+
+        os.remove(file_name)
+
+    except Exception as e:
+        await update.message.reply_text(f"Error: {str(e)}")
+
+# ❌ asyncio.run() বাদ
+app = ApplicationBuilder().token(BOT_TOKEN).build()
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, generate_voice))
+
+print("Bot running with REAL AI voice...")
+app.run_polling()
